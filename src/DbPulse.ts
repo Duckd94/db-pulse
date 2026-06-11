@@ -1,7 +1,8 @@
 import { EventEmitter } from 'node:events'
 import { ProbeRegistry } from './core/ProbeRegistry'
 import { ProbeRunner } from './core/ProbeRunner'
-import type { ProbeFunction, ProbeConfig } from './core/types'
+import { WebhookReporter } from './reporters/WebhookReporter'
+import type { ProbeFunction, ProbeConfig, WebhookOptions } from './core/types'
 
 export class DbPulse extends EventEmitter {
   private readonly registry = new ProbeRegistry()
@@ -27,6 +28,11 @@ export class DbPulse extends EventEmitter {
   stop(): this {
     this.runner.stopAll()
     this.running = false
+    return this
+  }
+
+  useWebhook(url: string, options?: WebhookOptions): this {
+    new WebhookReporter(this, url, options)
     return this
   }
 }
