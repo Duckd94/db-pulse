@@ -2,7 +2,8 @@ import { EventEmitter } from 'node:events'
 import { ProbeRegistry } from './core/ProbeRegistry'
 import { ProbeRunner } from './core/ProbeRunner'
 import { WebhookReporter } from './reporters/WebhookReporter'
-import type { ProbeFunction, ProbeConfig, WebhookOptions } from './core/types'
+import { SignalDocksReporter } from './reporters/SignalDocksReporter'
+import type { ProbeFunction, ProbeConfig, WebhookOptions, SignalDocksOptions } from './core/types'
 
 export class DbPulse extends EventEmitter {
   private readonly registry = new ProbeRegistry()
@@ -18,9 +19,7 @@ export class DbPulse extends EventEmitter {
     if (this.running) return this
     this.running = true
     for (const probe of this.registry.getAll()) {
-      this.runner.start(probe, (result) => {
-        this.emit('result', result)
-      })
+      this.runner.start(probe, (result) => { this.emit('result', result) })
     }
     return this
   }
@@ -33,6 +32,11 @@ export class DbPulse extends EventEmitter {
 
   useWebhook(url: string, options?: WebhookOptions): this {
     new WebhookReporter(this, url, options)
+    return this
+  }
+
+  useSignalDocks(options: SignalDocksOptions): this {
+    new SignalDocksReporter(this, options)
     return this
   }
 }
